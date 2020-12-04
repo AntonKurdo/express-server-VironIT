@@ -26,7 +26,7 @@ class UsersController {
   }
   delete = (req, res, next) => {
     res
-      .status(201)
+      .status(200)
       .send(this.service.deleteUser(req.params.id));
   }
 };
