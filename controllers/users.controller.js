@@ -4,7 +4,6 @@ class UsersController {
   constructor() {
     this.service = new UserService();
   }
-
   getAll = (req, res, next) => {
     res
       .status(200)
@@ -30,6 +29,6 @@ class UsersController {
       .status(201)
       .send(this.service.deleteUser(req.params.id));
   }
-}
+};
 
 module.exports = UsersController;

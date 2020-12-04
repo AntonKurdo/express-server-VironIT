@@ -3,7 +3,5 @@ const logBody = (req, res, next) => {
   next();
 }
 
-
-
 module.exports = logBody;
 
