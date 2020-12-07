@@ -1,33 +1,37 @@
+const User = require("../db");
+const DBUserService = require("../services/DBUsers.service");
 const UserService = require("../services/users.sevice");
+
 
 class UsersController {
   constructor() {
-    this.service = new UserService();
+    // this.service = new UserService();
+    this.service = new DBUserService();
   }
-  getAll = (req, res, next) => {
+  getAll = async(req, res, next) => {
     res
       .status(200)
-      .send(this.service.getAllUsers());
+      .send(await this.service.getAllUsers());      
   }
-  getUser = (req, res, next) => {
+  getUser =  async(req, res, next) => {
     res
       .status(200)
-      .send(this.service.getUser(req.params.id));
+      .send(await this.service.getUser(req.params.id));
   }
-  add = (req, res, next) => {     
+  add = async(req, res, next) => {     
     res
       .status(201)  
-      .send(this.service.addUser(req.body));
+      .send(await this.service.addUser(req.body));
   }
-  rewrite = (req, res, next) => {
+  rewrite = async(req, res, next) => {
     res
       .status(201)
-      .send(this.service.rewriteUsers(req.body, req.params.id));
+      .send(await this.service.rewriteUsers(req.body, req.params.id));
   }
-  delete = (req, res, next) => {
+  delete = async(req, res, next) => {
     res
       .status(200)
-      .send(this.service.deleteUser(req.params.id));
+      .send(await this.service.deleteUser(req.params.id));
   }
 };
 

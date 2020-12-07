@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-
 const filePath = path.parse(__dirname).dir + '/data/users.js';
+const uuid = require('uuid');
 
 class UserService {
   constructor() {
@@ -14,6 +14,7 @@ class UserService {
     return this.usersList.filter(user => user.id === id)[0];
   }
   addUser = (user) => {
+    user.id = uuid.v4();
     this.usersList.push(user);
     this.saveData();
     return this.usersList;
