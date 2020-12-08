@@ -18,6 +18,8 @@ const User = sequelize.define('user', {
   }
 })
 
+// ANOTHER WAY TO INITIALIZE A MODEL 
+
 // class User extends Model {};
 // User.init({
 //   name: {
