@@ -25,8 +25,12 @@ class DBUserService {
         }
     }
     addUser = async(user) => {
-       const newUser = await db.User.create(user);  
-       return newUser;
+        try {
+         const newUser = await db.User.create(user);  
+         return newUser;
+        } catch(err) {
+            return err;
+        }       
     }
     rewriteUsers = async(body, id) => {
         const user = await db.User.findOne({
@@ -47,7 +51,11 @@ class DBUserService {
                     id: id
                 }
             })
-        return 'User was deleted'
+            if(user === 0) {
+                return 'Not found!'
+            } else {
+                return 'User was deleted!'
+            }
     }
 };
 

@@ -1,4 +1,3 @@
-const User = require("../db");
 const DBUserService = require("../services/DBUsers.service");
 const UserService = require("../services/users.sevice");
 
