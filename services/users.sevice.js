@@ -22,8 +22,7 @@ class UserService {
   rewriteUsers = (body, id) => {
     this.usersList = this.usersList.map(user => {
         if(user.id === id) {
-          user = body;
-          user.id = id;
+          user = {...body, id};
         }
         return user;
     })
