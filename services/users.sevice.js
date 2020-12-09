@@ -20,10 +20,12 @@ class UserService {
     return this.usersList;
   }
   rewriteUsers = (body, id) => {
-    this.usersList.forEach(user => {
-      if (user.id === id) {
-        user.name = body.name;
-      }
+    this.usersList = this.usersList.map(user => {
+        if(user.id === id) {
+          user = body;
+          user.id = id;
+        }
+        return user;
     })
     this.saveData();
     return this.usersList
