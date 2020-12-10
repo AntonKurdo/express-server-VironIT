@@ -1,12 +1,36 @@
 const db = require('../db');
+const jwt = require('jsonwebtoken');
 
 class DBUserService {
     constructor() {
         (async() => {
             await db.sequelize.sync();
-            await db.User.create({name: 'Anton Kurdo'});
-            await db.User.create({name: 'Jane Doe'});
+            await db.User.create({
+                name: 'Anton Kurdo',
+                password: '$2y$10$nt.VH1bFpkQ4Cv6tbXJy3uGjaxesBl8HorKMHa1zsavlJ7uXwxhnK'
+            });            
+            await db.User.create({
+                name: 'Zhanna',
+                password: '$2y$10$nt.VH1bFpkQ4Cv6tbXJy3uGjaxesBl8HorKMHa1zsavlJ7uXwxhnK'
+            });            
         })()
+    };
+
+    login = (body) => {     
+        const access = jwt.sign({login: body.name, type: 'access'}, 'secret', {expiresIn: 300});
+        const refresh = jwt.sign({login: body.name, type: 'refresh'}, 'secret', {expiresIn: '24h'});
+        return {
+            access, 
+            refresh
+        };
+    }
+    refreshAccess = (login) => {    
+        return {
+            token: jwt.sign({login, type: 'access'}, 'secret', {expiresIn: 300})
+        }
+    }
+    getMySelf = (body) => {
+        return body;
     }
     getAllUsers = async() => {
         const data = await db.User.findAll({raw: true});
@@ -19,7 +43,7 @@ class DBUserService {
                 }
             });
         if (user === null) {
-            return 'Not found!'
+            return 'User is not found!'
         } else {
             return user;
         }
@@ -29,10 +53,11 @@ class DBUserService {
          const newUser = await db.User.create(user);  
          return newUser;
         } catch(err) {
-            return err;
+            return err.message;
         }       
     }
     rewriteUsers = async(body, id) => {
+        console.log(body);
         const user = await db.User.findOne({
                 where: {
                     id: id

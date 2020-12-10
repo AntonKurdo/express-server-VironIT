@@ -1,7 +1,8 @@
-const { Sequelize, Model, DataTypes, DATE} = require('sequelize');
+const { Sequelize, Model, DataTypes } = require('sequelize');
 
-const sequelize = new Sequelize('database', 'Anton', null, {
+const sequelize = new Sequelize('test_db', 'root', '1214', {
   host: 'localhost',
+  // port: '3306',
   dialect: "sqlite"
 });
 
@@ -15,6 +16,10 @@ const User = sequelize.define('user', {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false
   }
 })
 
