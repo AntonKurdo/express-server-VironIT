@@ -15,7 +15,6 @@ const auth = (tokenType) => async (req, res, next) => {
       }
     })
     if(user) {
-      // req.body = JSON.stringify(user)
       req.login = result.login;
       next();
     } else {

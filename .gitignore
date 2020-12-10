@@ -5,4 +5,4 @@
 /node_modules
 
 # static
-public/*
+public/**
