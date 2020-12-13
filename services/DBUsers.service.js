@@ -1,5 +1,7 @@
 const db = require('../db');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
 
 class DBUserService {
     constructor() {
@@ -36,7 +38,7 @@ class DBUserService {
         const data = await db.User.findAll({raw: true});
         return data;
     }
-    getUser = async(id) => {
+    getUser = async(id) => {        
         const user = await db.User.findOne({
                 where: {
                     id: id
@@ -57,15 +59,22 @@ class DBUserService {
         }       
     }
     rewriteUsers = async(body, id) => {
-        console.log(body);
         const user = await db.User.findOne({
                 where: {
                     id: id
                 }
             });
+             
         if (user === null) {
            return 'Not found!'
         } else {
+            if(user.avatar) {
+                fs.unlink(path.parse(__dirname).dir + '/' + user.avatar, err => {
+                    if(err) {
+                        console.log(err)
+                    }
+                })
+            }
             user.update(body);
             return user;
         }
