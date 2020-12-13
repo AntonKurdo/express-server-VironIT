@@ -14,7 +14,22 @@ class DBUserService {
             await db.User.create({
                 name: 'Zhanna',
                 password: '$2y$10$nt.VH1bFpkQ4Cv6tbXJy3uGjaxesBl8HorKMHa1zsavlJ7uXwxhnK'
-            });            
+            });  
+            fs.readdir(path.parse(__dirname).dir + '/public', (err, files) => {
+                if(err) {
+                    console.log(err)
+                    return;
+                }
+                if(files.length !== 0) {
+                files.forEach(file => {
+                    fs.unlink(path.parse(__dirname).dir + '/public/' + file, err => {
+                        if(err) {
+                        console.log(err)
+                        }
+                    })
+                })
+            }
+            })          
         })()
     };
 
