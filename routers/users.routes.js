@@ -12,11 +12,11 @@ const validateUserPas = require('../middlewares/validation.middleware');
 
 const controller = new UsersController();
 
-router
-  .get('/', auth('access'), controller.getAll)
+router 
+  .get('/', auth('access'), controller.getAll) //  Request Example: http://localhost:3000/users?page=1&count=1 || http://localhost:3000/users
   .get('/me', auth('access'), controller.getMySelf)
   .get('/refreshAccess',  auth('refresh'), controller.refreshAccess )
-  .get('/:id', auth('access'), controller.getUser) 
+  .get('/:id', controller.getUser)
   .post('/', uploadAva, workWithFD,  validateUserPas(createUserScheme), passwordCrypt, controller.add)
   .post('/login', identification, comparePasswords, controller.login)
   .put('/:id', auth('access'), uploadAva, workWithFD, validateUserPas(createUserScheme), passwordCrypt, controller.rewrite)

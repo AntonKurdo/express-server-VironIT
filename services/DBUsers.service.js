@@ -1,91 +1,114 @@
-const db = require('../db');
+const sequelize = require('../db');
+const User = require('../db/models/User.model');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
 
 class DBUserService {
     constructor() {
-        (async() => {
-            await db.sequelize.sync();
-            await db.User.create({
-                name: 'Anton Kurdo',
+        (async () => {
+            await sequelize.sync();
+            await User.create({
+                name: 'Anton',
                 password: '$2y$10$nt.VH1bFpkQ4Cv6tbXJy3uGjaxesBl8HorKMHa1zsavlJ7uXwxhnK'
-            });            
-            await db.User.create({
+            });
+            await User.create({
                 name: 'Zhanna',
                 password: '$2y$10$nt.VH1bFpkQ4Cv6tbXJy3uGjaxesBl8HorKMHa1zsavlJ7uXwxhnK'
-            });  
+            });           
             fs.readdir(path.parse(__dirname).dir + '/public', (err, files) => {
-                if(err) {
+                if (err) {
                     console.log(err)
                     return;
                 }
-                if(files.length !== 0) {
-                files.forEach(file => {
-                    fs.unlink(path.parse(__dirname).dir + '/public/' + file, err => {
-                        if(err) {
-                        console.log(err)
-                        }
+                if (files.length !== 0) {
+                    files.forEach(file => {
+                        fs.unlink(path.parse(__dirname).dir + '/public/' + file, err => {
+                            if (err) {
+                                console.log(err)
+                            }
+                        })
                     })
-                })
-            }
-            })          
+                }
+            })
         })()
     };
 
-    login = (body) => {     
-        const access = jwt.sign({login: body.name, type: 'access'}, 'secret', {expiresIn: 300});
-        const refresh = jwt.sign({login: body.name, type: 'refresh'}, 'secret', {expiresIn: '24h'});
+    login = (body) => {
+        const access = jwt.sign({
+            login: body.name,
+            type: 'access'
+        }, 'secret', {
+            expiresIn: 300
+        });
+        const refresh = jwt.sign({
+            login: body.name,
+            type: 'refresh'
+        }, 'secret', {
+            expiresIn: '24h'
+        });
         return {
-            access, 
+            access,
             refresh
         };
     }
-    refreshAccess = (login) => {    
+    refreshAccess = (login) => {
         return {
-            token: jwt.sign({login, type: 'access'}, 'secret', {expiresIn: 300})
+            token: jwt.sign({
+                login,
+                type: 'access'
+            }, 'secret', {
+                expiresIn: 300
+            })
         }
     }
     getMySelf = (body) => {
         return body;
     }
-    getAllUsers = async() => {
-        const data = await db.User.findAll({raw: true});
-        return data;
-    }
-    getUser = async(id) => {        
-        const user = await db.User.findOne({
-                where: {
-                    id: id
-                }
+    getAllUsers = async () => {
+        try {
+            const data = await User.findAll({
+                raw: true
             });
-        if (user === null) {
-            return 'User is not found!'
-        } else {
-            return user;
+            return data;
+        } catch(e) {
+            return e.message
         }
     }
-    addUser = async(user) => {
+    getUser = async (id) => {
         try {
-         const newUser = await db.User.create(user);  
-         return newUser;
-        } catch(err) {
-            return err.message;
-        }       
-    }
-    rewriteUsers = async(body, id) => {
-        const user = await db.User.findOne({
+            const user = await User.findOne({
                 where: {
                     id: id
                 }
-            });
-             
+            });            
+           user.usersPics = await user.getPhotos({raw: true})
+            return user;
+        } catch (e) {
+            return e.message
+        }
+    }
+    addUser = async (user) => {
+        try {
+            const newUser = await User.create(user);
+            return newUser;
+        } catch (err) {
+            return err.message;
+        }
+    }
+    rewriteUsers = async (body, id) => {
+        const user = await User.findOne({
+            where: {
+                id: id
+            }
+        });
+
         if (user === null) {
-           return 'Not found!'
+            return 'Not found!'
         } else {
-            if(user.avatar) {
+            if (user.avatar) {
                 fs.unlink(path.parse(__dirname).dir + '/' + user.avatar, err => {
-                    if(err) {
+                    if (err) {
                         console.log(err)
                     }
                 })
@@ -94,17 +117,31 @@ class DBUserService {
             return user;
         }
     }
-    deleteUser = async(id) => {
-        const user = await db.User.destroy({
-                where: {
-                    id: id
-                }
-            })
-            if(user === 0) {
-                return 'Not found!'
-            } else {
-                return 'User was deleted!'
+    deleteUser = async (id) => {
+        const user = await User.destroy({
+            where: {
+                id: id
             }
+        })
+        if (user === 0) {
+            return 'Not found!'
+        } else {
+            return 'User was deleted!'
+        }
+    }
+    getPartData = async (query) => {
+        const data = await User.findAndCountAll({
+            offset: query.page === '1' ? 0 : (query.page * query.count) - query.count,
+            limit: query.count,
+            where: {},
+        });
+        return {
+            content: data.rows,
+            page: query.page,
+            count: query.count,
+            totalCount: data.count,
+            totalPages: Math.ceil(data.count / query.count)
+        };
     }
 };
 

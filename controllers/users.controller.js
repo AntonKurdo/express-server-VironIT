@@ -6,7 +6,6 @@ class UsersController {
     // this.service = new UserService();
     this.service = new DBUserService();
   }
-
   login = async(req, res, next) => {
     res
       .status(200)
@@ -23,12 +22,16 @@ class UsersController {
       .send(this.service.getMySelf(req.login))
   }
   getAll = async(req, res, next) => {
-    res
+    if(!Object.keys(req.query).length) {
+      res
       .status(200)
       .send({
         users: await this.service.getAllUsers(), 
         login: req.login
-      });      
+      });
+    } else {
+      res.status(200).send(await this.service.getPartData(req.query))
+    }         
   }
   getUser =  async(req, res, next) => {
     res

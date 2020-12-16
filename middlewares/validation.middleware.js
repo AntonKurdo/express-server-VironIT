@@ -1,9 +1,4 @@
-const multer = require("multer");
-
-multer().single('data');
-
-const validateUserPas = (schema) => async(req, res, next) => {
- 
+const validateUserPas = (schema) => async(req, res, next) => { 
   try {
     const value = await schema.validateAsync(req.body.data);
     next();

@@ -1,13 +1,11 @@
-const db = require('../db/index');
+const User = require('../db/models/User.model');
 
 const identification = async (req, res, next) => {
-  db.sequelize.sync();
-  const user = await db.User.findOne({ where: {
+  const user = await User.findOne({ where: {
     name: req.body.name
-  }});  
- 
+  }});   
   if (user === null) {
-   res.send('Incorrect login!')
+   res.status(400).send('Incorrect login!')
   } else {
     next(user.password)
   }

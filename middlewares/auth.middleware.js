@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const db = require("../db");
+const User = require('../db/models/User.model')
 
 const auth = (tokenType) => async (req, res, next) => {
   try {
@@ -8,8 +8,7 @@ const auth = (tokenType) => async (req, res, next) => {
     if(result.type !== tokenType) {
       throw new Error('Invalid type of token')
     }
-    await db.sequelize.sync();
-    const user = await db.User.findOne({
+    const user = await User.findOne({
       where: {
         name: result.login
       }
@@ -19,8 +18,7 @@ const auth = (tokenType) => async (req, res, next) => {
       next();
     } else {
       res.send('You have no access! User was removed...')
-    }
-    
+    }    
   } catch (err) {
     res
       .status(401)
