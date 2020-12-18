@@ -41,7 +41,7 @@ class UsersController {
         login: req.login
       });
   }
-  add = async(req, res, next) => {     
+  add = async(req, res, next) => {   
     res
       .status(201)  
       .send(await this.service.addUser(req.body));

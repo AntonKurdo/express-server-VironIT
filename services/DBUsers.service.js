@@ -3,6 +3,8 @@ const User = require('../db/models/User.model');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
+const bcrypt = require('bcrypt');
+const passwordCrypt = require('../utils/pasCrypt.utils');
 
 class DBUserService {
     constructor() {
@@ -15,7 +17,7 @@ class DBUserService {
             await User.create({
                 name: 'Zhanna',
                 password: '$2y$10$nt.VH1bFpkQ4Cv6tbXJy3uGjaxesBl8HorKMHa1zsavlJ7uXwxhnK'
-            });           
+            });
             fs.readdir(path.parse(__dirname).dir + '/public', (err, files) => {
                 if (err) {
                     console.log(err)
@@ -34,23 +36,41 @@ class DBUserService {
         })()
     };
 
-    login = (body) => {
-        const access = jwt.sign({
-            login: body.name,
-            type: 'access'
-        }, 'secret', {
-            expiresIn: 300
-        });
-        const refresh = jwt.sign({
-            login: body.name,
-            type: 'refresh'
-        }, 'secret', {
-            expiresIn: '24h'
-        });
-        return {
-            access,
-            refresh
-        };
+    login = async (body) => {
+        try {
+            const candidate = await User.findOne({
+                where: {
+                    name: body.name
+                }
+            });
+            if (candidate) {
+                const match = await bcrypt.compare(body.password, candidate.password);
+                if (match) {
+                    const access = jwt.sign({
+                        login: body.name,
+                        type: 'access'
+                    }, 'secret', {
+                        expiresIn: 300
+                    });
+                    const refresh = jwt.sign({
+                        login: body.name,
+                        type: 'refresh'
+                    }, 'secret', {
+                        expiresIn: '24h'
+                    });
+                    return {
+                        access,
+                        refresh
+                    };
+                } else {
+                    return 'Wrong password...'
+                }
+            } else {
+                return 'User not found...'
+            }
+        } catch (e) {
+            return e.message
+        }
     }
     refreshAccess = (login) => {
         return {
@@ -71,7 +91,7 @@ class DBUserService {
                 raw: true
             });
             return data;
-        } catch(e) {
+        } catch (e) {
             return e.message
         }
     }
@@ -81,15 +101,20 @@ class DBUserService {
                 where: {
                     id: id
                 }
-            });            
-           user.usersPics = await user.getPhotos({raw: true})
-            return user;
+            });
+            return {
+                ...user.dataValues,
+                userPics: await user.getPhotos({
+                    raw: true
+                })
+            };
         } catch (e) {
             return e.message
         }
     }
     addUser = async (user) => {
         try {
+            user.password = await passwordCrypt(user.password);
             const newUser = await User.create(user);
             return newUser;
         } catch (err) {
@@ -102,7 +127,6 @@ class DBUserService {
                 id: id
             }
         });
-
         if (user === null) {
             return 'Not found!'
         } else {
@@ -113,6 +137,7 @@ class DBUserService {
                     }
                 })
             }
+            body.password = await passwordCrypt(body.password);
             user.update(body);
             return user;
         }
